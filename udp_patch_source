@@ -1,0 +1,50 @@
+99a100,101
+> #define OSNET_HOST_IP "192.168.24.14"
+> #define OSNET_HOST_PORT "56789"
+104a107,111
+> int fd_udp;
+> struct addrinfo hints_udp;
+> struct addrinfo *pos_udp;
+> struct addrinfo *serv_udp;
+> 
+130a138,148
+> bool osnet_send_udp(const char * msg,int fd, struct addrinfo *pos); 
+> 
+> bool osnet_send_udp(const char * msg,int fd, struct addrinfo *pos) {
+> 	char buf[100];
+> 	memset(buf,0,sizeof(buf));
+> 	sprintf(buf, "%s-%u", msg, getpid());
+> 	sendto(fd, buf, strlen(buf), 0, pos->ai_addr, pos->ai_addrlen);
+> 	return true;
+> }
+> 
+> 
+169a188,202
+> 	
+> 	memset(&hints_udp, 0, sizeof(hints_udp));
+> 	hints_udp.ai_family = AF_UNSPEC;
+> 	hints_udp.ai_socktype = SOCK_DGRAM;
+> 	getaddrinfo(OSNET_HOST_IP, OSNET_HOST_PORT, &hints_udp, &serv_udp);
+> 	for (pos_udp = serv_udp; pos_udp != NULL; pos_udp = pos_udp->ai_next) {
+> 
+> 		fd_udp = socket(pos_udp->ai_family, pos_udp->ai_socktype,pos_udp->ai_protocol);
+> 		if (fd_udp == -1)
+> 			continue;
+> 		else
+> 			break;
+> 	}
+> 	bind(fd_udp, pos_udp->ai_addr, pos_udp->ai_addrlen);
+> 
+1715a1749
+> 	osnet_send_udp("start",fd_udp,pos_udp);
+2753a2788,2789
+> 		osnet_send_udp("downtime_start",fd_udp,pos_udp);
+> 		close(fd_udp);
+3043,3044c3079,3080
+<     s->threshold_size = bandwidth * s->parameters.downtime_limit;
+< 
+---
+> 	//s->threshold_size = bandwidth * s->parameters.downtime_limit;
+> 	s->threshold_size = 1024*1024*2;
+3107a3144
+> 		printf("PENDING SIZE:%lu\n", pending_size/4096);
